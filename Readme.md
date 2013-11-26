@@ -51,7 +51,7 @@ Spin up a webserver
 --
 Fog creates a server, and bootstraps chef. chef installs rbenv, git, nginx, logrotate, etc. Also deploys a sinatra app
 ```sh
-rake create_webserver
+rake create_web
 ```
 Configure DNS and load balancing
 --

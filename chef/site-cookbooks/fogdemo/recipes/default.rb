@@ -23,3 +23,25 @@ directory "#{node['fogdemo']['site_root']}" do
   group 'rbenv' 
   mode 0755
 end
+
+
+template "/etc/init/puma-manager.conf" do 
+  source "init.puma-manager.conf.erb" 
+  owner 'root' 
+  group 'root' 
+  mode 0644
+end
+
+template "/etc/init/puma.conf" do 
+  source "init.puma.conf.erb" 
+  owner 'root' 
+  group 'root' 
+  mode 0644
+end
+
+template "/etc/puma.conf" do
+  source "puma.conf.erb"
+  owner 'root'
+  group 'root'
+  mode 0644
+end

@@ -12,14 +12,13 @@ conn.servers.each { |server|
   
 
   commands = [  "sudo chef-client -o 'role[webserver]'",
-                'cd /var/www/fogdemo; if [ -f .git/config ]; then git pull; else git clone https://github.com/splap/seven-web.git .; fi' ]
+                'cd /var/www/fogdemo; if [ -f .git/config ]; then git pull; else git clone https://github.com/splap/seven-web.git .; fi',
+                'cd /var/www/fogdemo; pwd; whoami; bundle install',
+                'cd /var/www/fogdemo; bundle exec rackup config.ru -p 3000 -D;']
   
   p "Updating webserver: #{server.id}"
   stdout_helper = Proc.new { |stdout| STDOUT.write stdout[ 0] }
   server.ssh commands, &stdout_helper 
-
-#               # 'rackup config.ru -p 3000 -D']
-
 
 }
 
