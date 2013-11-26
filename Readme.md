@@ -17,6 +17,7 @@ Clone the repo and install gems
 ```sh
 cd ~ 
 git clone git@github.com:splap/fogdemo.git
+cd fogdemo 
 bundle install
 ```
 Set up Chef
