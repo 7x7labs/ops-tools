@@ -1,7 +1,7 @@
 FogDemo  
 =========
 
-This is a little devops demo using [Fog] [fog github] and [Chef] [chef]. It does a few things:
+This is a devops demo using [Fog] [fog github] and [Chef] [chef]. It does a few things:
 
   - spins up ec2 web servers
   - installs chef clients on the web servers
@@ -10,7 +10,7 @@ This is a little devops demo using [Fog] [fog github] and [Chef] [chef]. It does
   - launches and configures load balancer
   - configures dns for the app
 
-I've only tested on OS X with rbenv / 1.9.3-p429 available, and bundler installed
+This has only been tested on OS X with rbenv / 1.9.3-p429 available, and bundler installed
 
 Clone the repo and install gems
 --
