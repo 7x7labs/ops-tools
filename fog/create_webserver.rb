@@ -1,4 +1,4 @@
-load File.expand_path("requires.rb", File.dirname(__FILE__))
+load File.expand_path "requires.rb", File.dirname(__FILE__)
 
 connection = Util.get_connection
 p "Connected to fog compute."

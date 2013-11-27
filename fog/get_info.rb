@@ -1,4 +1,4 @@
-load File.expand_path("requires.rb", File.dirname(__FILE__))
+load File.expand_path "requires.rb", File.dirname(__FILE__)
 
 p "DNS ZONE CONFIG"
 zone = Util.get_dns.zones.first.reload

@@ -22,9 +22,9 @@ stop on (stopping puma-manager or runlevel [06])
 
 # change apps to match your deployment user if you want to use this as a less privileged user (recommended!)
 setuid www-data
-setgid www-data
+setgid rbenv
 
-respawn
+#respawn
 respawn limit 3 30
 
 instance ${app}
@@ -37,25 +37,12 @@ script
 exec /bin/bash <<'EOT'
   # set HOME to the setuid user's home, there doesn't seem to be a better, portable way
   export HOME="$(eval echo ~$(id -un))"
-
+  export RBENV_ROOT=<% node[:rbenv][:install_prefix] %>/rbenv
+  export PATH="/opt/rbenv:$PATH"
+  logger -t puma "______Env: $(eval env)"
+  logger -t puma "______Whoami: $(eval whoami)"
   cd $app
-
-  if [ -d "$HOME/.rbenv/bin" ]; then
-    export PATH="$HOME/.rbenv/bin:$PATH"
-  elif [ -f  /etc/profile.d/rvm.sh ]; then
-    source /etc/profile.d/rvm.sh
-  elif [ -f /usr/local/rvm/scripts/rvm ]; then
-    source /etc/profile.d/rvm.sh
-  elif [ -f "$HOME/.rvm/scripts/rvm" ]; then
-    source "$HOME/.rvm/scripts/rvm"
-  elif [ -f /usr/local/share/chruby/chruby.sh ]; then
-    source /usr/local/share/chruby/chruby.sh
-    if [ -f /usr/local/share/chruby/auto.sh ]; then
-      source /usr/local/share/chruby/auto.sh
-    fi
-    # if you aren't using auto, set your version here
-    # chruby 2.0.0
-  fi
+  logger -t puma "______Pwd: $(eval pwd)
 
   logger -t puma "Starting server: $app"
 

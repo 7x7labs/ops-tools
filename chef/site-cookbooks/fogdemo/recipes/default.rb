@@ -24,7 +24,6 @@ directory "#{node['fogdemo']['site_root']}" do
   mode 0755
 end
 
-
 template "/etc/init/puma-manager.conf" do 
   source "init.puma-manager.conf.erb" 
   owner 'root' 

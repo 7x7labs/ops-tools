@@ -20,8 +20,9 @@ task :dns do
   ruby "fog/config_dns.rb"
 end
 
-desc "Update the fogdemo cookbook"
+desc "Update cookbook and role"
 task :push_cookbook do
+  system "cd chef; knife role from file roles/webserver.rb"
   system "cd chef; knife cookbook upload 'fogdemo'"
 end
 

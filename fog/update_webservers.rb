@@ -1,4 +1,4 @@
-load File.expand_path("requires.rb", File.dirname(__FILE__))
+load File.expand_path "requires.rb", File.dirname(__FILE__)
 
 conn = Util.get_connection
 
@@ -12,9 +12,11 @@ conn.servers.each { |server|
   
 
   commands = [  "sudo chef-client -o 'role[webserver]'",
-                'cd /var/www/fogdemo; if [ -f .git/config ]; then git pull; else git clone https://github.com/splap/seven-web.git .; fi',
-                'cd /var/www/fogdemo; pwd; whoami; bundle install',
-                'cd /var/www/fogdemo; bundle exec rackup config.ru -p 3000 -D;']
+                'sudo rm -rf /var/www/fogdemo/*',
+                'sudo rm -rf /var/www/fogdemo/\.*',
+                'cd /var/www/fogdemo; pwd; git clone https://github.com/splap/seven-web.git .; mkdir -p tmp/puma',
+                'sudo start puma-manager',
+                "echo 'started puma-manager'"]
   
   p "Updating webserver: #{server.id}"
   stdout_helper = Proc.new { |stdout| STDOUT.write stdout[ 0] }

@@ -1,4 +1,4 @@
-load File.expand_path("requires.rb", File.dirname(__FILE__))
+load File.expand_path "requires.rb", File.dirname(__FILE__)
 
 lb = Util.get_elb.load_balancers.find { |balancer| balancer.id == LOAD_BALANCER_ID }
 
