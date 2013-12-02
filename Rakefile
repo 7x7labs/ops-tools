@@ -1,44 +1,43 @@
+Dir[File.dirname(__FILE__) + "/fog/*.rb"].each { |f| require f }
+
 task :default => [:info]
 
-desc "Prints useful state info about load balancer, dns, and webservers"
+desc "Prints state information about load balancer, dns, and webservers"
 task :info do
-  ruby "fog/get_info.rb"
+  State.new().show_state
 end
 
-desc "Spin up a web server with app and prerequisites"
+desc "Spins up a web server and installs app and its prerequisites"
 task :create_web do
-  ruby "fog/create_webserver.rb"
+  Compute.new().create_webserver
 end
 
 desc "Create Load Balancer if necessary and configure."
 task :lb do
-  ruby "fog/config_load_balancer.rb"
+  LoadBalancer.new().configure_load_balancer
 end
 
 desc "Create DNS zone if necessary and configure"
 task :dns do
-  ruby "fog/config_dns.rb"
+  DNS.new().configure_dns
 end
 
 desc "Update cookbook and role"
 task :push_cookbook do
-  system "cd chef; knife role from file roles/webserver.rb"
-  system "cd chef; knife cookbook upload 'fogdemo'"
+  Chef.push_cookbook
 end
 
 desc "Update webservers with latest chef config and app code"
 task :update_web => :push_cookbook do
-  ruby "fog/update_webservers.rb"
+  Compute.new().update_webservers
 end
 
 desc "Destroy any active server instances."
 task :kill_all do
-  ruby "fog/destroy_servers.rb"
+  Compute.new().destroy_servers
 end
 
-desc "Convenience task for debugging: creates Fog objects and pauses"
-task :debug do
-  ruby "fog/debug_helper.rb"
+desc "Destroy a single web server."
+task :destroy_server, :server_id do |t, args|
+  Compute.new().destroy_server args['server_id']
 end
-
-

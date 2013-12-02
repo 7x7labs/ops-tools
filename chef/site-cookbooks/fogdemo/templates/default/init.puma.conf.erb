@@ -21,8 +21,8 @@ description "Puma Background Worker"
 stop on (stopping puma-manager or runlevel [06])
 
 # change apps to match your deployment user if you want to use this as a less privileged user (recommended!)
-setuid www-data
-setgid rbenv
+setuid ubuntu
+setgid ubuntu
 
 #respawn
 respawn limit 3 30
@@ -37,15 +37,10 @@ script
 exec /bin/bash <<'EOT'
   # set HOME to the setuid user's home, there doesn't seem to be a better, portable way
   export HOME="$(eval echo ~$(id -un))"
-  export RBENV_ROOT=<% node[:rbenv][:install_prefix] %>/rbenv
-  export PATH="/opt/rbenv:$PATH"
-  logger -t puma "______Env: $(eval env)"
-  logger -t puma "______Whoami: $(eval whoami)"
+  export RBENV_ROOT=/opt/rbenv
+  export PATH=/opt/rbenv/shims:/opt/rbenv/bin:$PATH
   cd $app
-  logger -t puma "______Pwd: $(eval pwd)
-
   logger -t puma "Starting server: $app"
-
   exec bundle exec puma -C config/puma.rb
 EOT
 end script
