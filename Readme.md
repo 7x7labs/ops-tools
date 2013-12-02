@@ -49,41 +49,40 @@ knife role from file roles/webserver.rb
 ```
 Spin up a webserver
 --
-Fog creates a server, and bootstraps chef. chef installs rbenv, git, nginx, logrotate, etc. Also deploys a sinatra app
+Fog creates a server, and bootstraps chef. chef installs rbenv, git, nginx, logrotate, etc. It then pulls a sinatra app, installs required gems, and starts up puma.
 ```sh
 rake create_web
 ```
 Configure DNS and load balancing
 --
 Connect to or create a load balancer and tell it which web instance to use
-```
+```sh
 rake lb
 ```
 Configure DNS. Points an alias A record at the load balancer
-```
+```sh
 rake dns
 ```
 Care and feeding
 --
 Get an overview of the app's cloud deployment
-```
+```sh
 rake get_info
 ```
 Update all webservers. This will apply chef configuration changes and update the sinatra app.
 This would not work in a zero downtime deploy strategy without more effort.
-```
+```sh
 rake update_web
 ```
-Testing helpers
---
+Stop and abandon a web server
+```sh
+rake destroy_server['server_id']
+```
 Stop and abandon all existing servers
+```sh
+rake destroy_all
 ```
-rake kill_all
-```
-Stops you in a RELP with required code loaded, and some handy fog classes instantiated
-```
-rake debug
-````
+
 
 [fog github]: https://github.com/fog/fog
 [chef]: http://www.opscode.com/chef/

@@ -33,7 +33,7 @@ task :update_web => :push_cookbook do
 end
 
 desc "Destroy any active server instances."
-task :kill_all do
+task :destroy_all do
   Compute.new().destroy_servers
 end
 
