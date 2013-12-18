@@ -45,10 +45,9 @@ task :update_xmpp => :push_cookbook do
   Compute.new().update_xmppserver
 end
 
-desc "Destroy any active server instances."
+desc "Destroy any active compute instances."
 task :destroy_all do
   Compute.new().destroy_servers
-  LoadBalancer.new()
 end
 
 desc "Destroy a single web server."
