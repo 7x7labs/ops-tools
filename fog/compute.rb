@@ -6,24 +6,33 @@ class Compute
   attr_accessor :connection
 
   def initialize
-    self.connection = Fog::Compute.new( AWS_CREDENTIALS.merge provider: 'AWS' )
+    self.connection = Fog::Compute.new AWS_CREDENTIALS.merge provider: 'AWS'
   end
 
   def create_webserver
-    server = connection.servers.bootstrap  private_key_path:  PRIVATE_KEY_PATH,
-                                            public_key_path:  PUBLIC_KEY_PATH,
-                                            username:         'ubuntu',
-                                            flavor_id:        'm1.small',
-                                            image_id:         SERVER_IMAGE_ID
-    p "Created server: #{server.public_ip_address}, SSH keys are in #{SSH_DIR}"
-
-    system  "cd chef; knife bootstrap #{server.public_ip_address} -x ubuntu " + 
-            "-i #{PRIVATE_KEY_PATH} --sudo -V --run-list 'role[webserver]'"
-    p "Bootstrapped chef client and installed web server prereq's"
-
+    server = create_server 'webserver'
+    
     update_webserver server
-    p "Installed gems, Updated sinatra app, and started up puma."
+    p "Installed gems, Updated sinatra app, and started up puma."  end
 
+  def create_xmppserver
+    server = create_server 'xmppserver'
+
+  end
+
+  def update_xmppserver server_id=nil
+    connection.servers.each { |server|
+      next unless server_id.nil? || server.id == server_id
+ 
+      server.username = 'ubuntu'
+      server.private_key_path = PRIVATE_KEY_PATH
+
+      cmds = ["sudo chef-client -o 'role[xmppserver]'",
+              "echo 'done'"]
+
+      p "Updating xmppserver: #{server.id}"
+      run_ssh server, cmds
+    }
   end
 
   def update_webservers
@@ -47,8 +56,7 @@ class Compute
                   "echo 'started puma-manager'"]
     
     p "Updating webserver: #{server.id}"
-    stdout_helper = Proc.new { |stdout| STDOUT.write stdout[0] }
-    server.ssh commands, &stdout_helper 
+    run_ssh server, commands
   end
 
   def destroy_servers 
@@ -66,6 +74,27 @@ class Compute
         p "Destroyed server #{server.id}"
       end
     }
+  end
+
+  private
+
+  def run_ssh server, commands
+    stdout_helper = Proc.new { |stdout| STDOUT.write stdout[0] }
+    server.ssh commands, &stdout_helper 
+  end
+
+  def create_server role
+    server = connection.servers.bootstrap  private_key_path: PRIVATE_KEY_PATH,
+                                  public_key_path:  PUBLIC_KEY_PATH,
+                                  username:         'ubuntu',
+                                  flavor_id:        'm1.small',
+                                  image_id:         SERVER_IMAGE_ID
+    p "Created server: #{server.public_ip_address}, SSH keys are in #{SSH_DIR}"
+
+    system  "cd chef; knife bootstrap #{server.public_ip_address} -x ubuntu " + 
+            "-i #{PRIVATE_KEY_PATH} --sudo -V --run-list 'role[#{role}]'"
+    p "Bootstrapped chef client and assigned the role: #{role}"
+
   end
 
 end

@@ -14,4 +14,5 @@ module FogDemo
   PUBLIC_KEY_PATH   = '~/.ssh/fogdemo/aws_fog_id_rsa.pub'
   AWS_CREDENTIALS   = { aws_access_key_id: ENV['AWS_ID'],
                         aws_secret_access_key:  ENV['AWS_SECRET'] }
+  XMPP_VERSION      = '5.1.5-b3164'
 end

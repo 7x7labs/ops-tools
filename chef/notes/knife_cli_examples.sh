@@ -3,6 +3,8 @@ knife client create fogclient -a -f ".chef/49-validator.pem"
 
 knife client list
 
+knife cookbook create xmpp
+
 # looks at each cookbook declaration and fetches the cookbook from the source specified, 
 # or from the default source if none is provided.
 librarian-chef install --clean --verbose

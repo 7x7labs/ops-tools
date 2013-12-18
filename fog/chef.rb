@@ -5,7 +5,7 @@ class Chef
 
   def self.push_cookbook
     system "cd chef; knife role from file roles/webserver.rb"
-    system "cd chef; knife cookbook upload 'fogdemo'"
+    system "cd chef; knife cookbook upload -a -o ./site-cookbooks"
   end
 
 end

@@ -6,13 +6,15 @@ class LoadBalancer
   attr_accessor :lb
 
   def initialize
-    elb = Fog::AWS::ELB.new AWS_CREDENTIALS
-    self.lb = elb.load_balancers.find { |balancer| balancer.id == LOAD_BALANCER_ID }
-    self.lb ||= elb.load_balancers.create id: LOAD_BALANCER_ID
+    @elb = Fog::AWS::ELB.new AWS_CREDENTIALS
+    self.lb = @elb.load_balancers.find { |balancer| balancer.id == LOAD_BALANCER_ID }
   end
 
+  def create
+    self.lb ||= @elb.load_balancers.create id: LOAD_BALANCER_ID
+  end
 
-  def configure_load_balancer
+  def configure
     # TODO - hit a status page instead of checking for 'running'
     good_server_ids = []
     Compute.new().connection.servers.each { |s| good_server_ids << s.id if s.state == "running" }
@@ -27,4 +29,9 @@ class LoadBalancer
 
     p "Live web servers: #{lb.instances}"
   end
+
+  def destroy
+    @elb.load_balancers.one? { |lb| lb.destroy if lb.balancer.id == LOAD_BALANCER_ID }
+  end
+
 end
