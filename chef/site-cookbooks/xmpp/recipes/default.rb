@@ -10,11 +10,18 @@ package "logrotate"
 tigase_version = "tigase-server-5.1.5-b3164"
 tigase_bin_file = "#{tigase_version}.tar.gz"
 tigase_bin_path = "#{Chef::Config['file_cache_path']}/#{tigase_bin_file}"
-extract_to = "~/tigase"
+extract_to = "/var/lib/tigase"
 
-# TODO - create a tigase user and run the server with that user
-# user "tigase" do
-# end
+
+user "tigase" do
+  action :create
+end
+
+group "tigase" do
+  action :create
+  members "tigase"
+  append true
+end
 
 remote_file tigase_bin_path do
   action :create_if_missing
@@ -46,6 +53,7 @@ remote_file derby_bin_path do
   group 'ubuntu'
   mode 0644
 end
+
 bash 'extract_derby' do
   code <<-EOH
     mkdir /opt/Apache
@@ -59,17 +67,26 @@ bash 'extract_derby' do
   not_if { ::File.exists?(extract_to) }
 end
 
-
-template "#{ENV['HOME']}/tigase/etc/init.properties" do 
+template "/var/lib/tigase/etc/init.properties" do 
   source "init.properties"
   owner 'ubuntu'
   group 'ubuntu'
   mode 0644
 end
 
-template "#{ENV['HOME']}/tigase/etc/tigase.conf" do 
+template "/var/lib/tigase/etc/tigase.conf" do 
   source "tigase.conf"
   owner 'ubuntu'
   group 'ubuntu'
   mode 0644
+end
+
+bash 'initialize database' do
+  code <<-EOH
+    cd /var/lib/tigase
+    chmod u+x ./scripts/db-create-derby.sh
+    ./scripts/db-create-derby.sh /var/lib/tigase/tigasedb
+    ./scripts/tigase.sh start etc/tigase.conf
+    EOH
+  not_if ( ::File.exists?('/var/lib/tigase/tigasedb'))
 end

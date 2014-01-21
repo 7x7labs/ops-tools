@@ -1,11 +1,13 @@
 require 'librarian/chef/integration/knife'
 
 current_dir = File.dirname(__FILE__)
-log_level                :info
+log_level                :debug
 log_location             STDOUT
 node_name                "fogdemo"
-client_key               "#{ENV['HOME']}/.ssh/fogdemo/fogdemo.pem"
+
+#hosted chef settings 
 validation_client_name   "49-validator"
+client_key               "#{ENV['HOME']}/.ssh/fogdemo/fogdemo.pem"
 validation_key           "#{ENV['HOME']}/.ssh/fogdemo/49-validator.pem"
 chef_server_url          "https://api.opscode.com/organizations/49"
 cache_type               'BasicFile'

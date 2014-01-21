@@ -8,11 +8,11 @@ module FogDemo
   DOMAIN_NAME       = 'splap.net'
   DOMAIN_NAME_DOT   = 'splap.net.'
   LOAD_BALANCER_ID  = 'fogdemo'
-  SERVER_IMAGE_ID   = 'ami-95ac89fc'
-  SSH_DIR           = '~/.ssh/fogdemo'
-  PRIVATE_KEY_PATH  = '~/.ssh/fogdemo/aws_fog_id_rsa'
-  PUBLIC_KEY_PATH   = '~/.ssh/fogdemo/aws_fog_id_rsa.pub'
-  AWS_CREDENTIALS   = { aws_access_key_id: ENV['AWS_ID'],
-                        aws_secret_access_key:  ENV['AWS_SECRET'] }
+  WEB_SERVER_AMI    = 'ami-c5a98cac'
+  XMPP_SERVER_AMI   = 'ami-2f774746'
   XMPP_VERSION      = '5.1.5-b3164'
+  PROVIDER          = ENV['FOG_CREDENTIAL']
+  SSH_DIR           = '~/.ssh/fogdemo'
+  PUBLIC_KEY_PATH   = '~/.ssh/fogdemo/aws_fog_id_rsa.pub'
+  PRIVATE_KEY_PATH  = '~/.ssh/fogdemo/aws_fog_id_rsa'
 end

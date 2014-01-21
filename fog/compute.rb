@@ -3,28 +3,40 @@ require_relative 'fog_demo.rb'
 class Compute
   include FogDemo
 
-  attr_accessor :connection
+  attr_accessor :compute
 
-  def initialize
-    self.connection = Fog::Compute.new AWS_CREDENTIALS.merge provider: 'AWS'
+  def initialize 
+    self.compute = Fog::Compute.new Fog.credentials
   end
 
-  def create_webserver
-    server = create_server 'webserver'
-    
-    update_webserver server
-    p "Installed gems, Updated sinatra app, and started up puma."  end
+  def debug 
+    debugger
+    p 1
+  end
 
   def create_xmppserver
-    server = create_server 'xmppserver'
+    p "Starting at #{Time.new}"
+    
+    # sg = compute.security_groups.find {|sg| sg.name == 'default' }
+    # sg.authorize_port_range(5222..5223)
+    # sg.authorize_port_range(5269..5229)
+    # sg.authorize_port_range(5280..5280)
 
+    server = create_server 'xmppserver', { image_id:           XMPP_SERVER_AMI,
+                                    private_key_path:   PRIVATE_KEY_PATH,
+                                    public_key_path:    PUBLIC_KEY_PATH,
+                                    flavor_id:          'c1.medium',
+                                    username:           'ubuntu'
+                                  }
+    p "Finished at #{Time.new}, public ip:"
+    p server.public_ip_address
   end
 
-  def update_xmppserver server_id=nil
-    connection.servers.each { |server|
-      next unless server_id.nil? || server.id == server_id
- 
-      server.username = 'ubuntu'
+  def update_xmppserver
+    compute.servers.each { |server|
+      next unless server.tags['Name'] == 'xmppserver'
+      next if server.state == 'terminated'
+      #server.username = 'deploy'
       server.private_key_path = PRIVATE_KEY_PATH
 
       cmds = ["sudo chef-client -o 'role[xmppserver]'",
@@ -35,44 +47,56 @@ class Compute
     }
   end
 
+  def create_webserver
+    server = create_server 'webserver', { image_id:           WEB_SERVER_AMI,
+                                          private_key_path:   PRIVATE_KEY_PATH,
+                                          public_key_path:    PUBLIC_KEY_PATH,
+                                          instance_type:      't1.tiny',
+                                          username:           'ubuntu'
+                                        }
+    p "created server"
+    
+    update_webserver server
+    p "Installed gems, Updated sinatra app, and started up puma."  
+  end
+
   def update_webservers
-    connection.servers.each { |server|
+    compute.servers.each { |server|
       next unless server.state == 'running'
       update_webserver server
     }
   end
 
   def update_webserver server
-    server.username = 'ubuntu'
+    # server.username = 'ubuntu'
     server.private_key_path = PRIVATE_KEY_PATH
 
-    commands = [  "sudo chef-client -o 'role[webserver]'",
-                  'sudo rm -rf /var/www/fogdemo/*',
-                  'sudo rm -rf /var/www/fogdemo/\.*',
-                  "echo 'cloning repo'",
-                  'cd /var/www/fogdemo; pwd; git clone https://github.com/splap/seven-web.git .; mkdir -p tmp/puma;',
-                  "export PATH=/opt/rbenv/shims:/opt/rbenv/bin:$PATH; cd /var/www/fogdemo; echo 'Installing Bundler as '; echo $PATH; bundle install;",
-                  'sudo start puma-manager',
-                  "echo 'started puma-manager'"]
+    commands = [  
+                "sudo chef-client -o 'role[webserver]'",
+                'sudo rm -rf /var/www/fogdemo/*',
+                'sudo rm -rf /var/www/fogdemo/\.*',
+                "echo 'cloning repo'",
+                'cd /var/www/fogdemo; pwd; git clone https://github.com/splap/seven-web.git .; mkdir -p tmp/puma;',
+                "export PATH=/opt/rbenv/shims:/opt/rbenv/bin:$PATH; cd /var/www/fogdemo; echo 'Installing Bundler as '; echo $PATH; bundle install;",
+                'sudo start puma-manager',
+                "echo 'started puma-manager'"]
+                
     
     p "Updating webserver: #{server.id}"
     run_ssh server, commands
   end
 
   def destroy_servers 
-    connection.servers.each { |server|
-      destroy_server server.id
+    compute.servers.each { |server|
+      destroy_server server.id unless server.state == 'terminated'
     }
   end
 
   def destroy_server server_id
-    connection.servers.each { |server|
+    compute.servers.each { |server|
       next unless server_id == server.id
-      
-      if server.state == 'running'
-        server.destroy 
-        p "Destroyed server #{server.id}"
-      end
+      server.destroy 
+      p "Destroyed server #{server.id}"
     }
   end
 
@@ -83,18 +107,16 @@ class Compute
     server.ssh commands, &stdout_helper 
   end
 
-  def create_server role
-    server = connection.servers.bootstrap  private_key_path: PRIVATE_KEY_PATH,
-                                  public_key_path:  PUBLIC_KEY_PATH,
-                                  username:         'ubuntu',
-                                  flavor_id:        'm1.small',
-                                  image_id:         SERVER_IMAGE_ID
-    p "Created server: #{server.public_ip_address}, SSH keys are in #{SSH_DIR}"
+  def create_server role, attrs={}
+    Fog.credential = :aws_fog_id_rsa
 
+    server = compute.servers.bootstrap( { name: role, tags: { "Name" => role } }.merge(attrs) )
+    
     system  "cd chef; knife bootstrap #{server.public_ip_address} -x ubuntu " + 
             "-i #{PRIVATE_KEY_PATH} --sudo -V --run-list 'role[#{role}]'"
     p "Bootstrapped chef client and assigned the role: #{role}"
 
+    server 
   end
 
 end
