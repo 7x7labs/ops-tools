@@ -1,16 +1,20 @@
-FogDemo  
+Ops Tools 
 =========
 
 This is a devops demo using [Fog] [fog github] and [Chef] [chef]. It does a few things:
 
-  - spins up ec2 web servers
+create up ec2 web servers
+
   - installs chef clients on the web servers
   - installs and configures rbenv, nginx, git, etc
   - delpoys a sinatra web app
   - launches and configures load balancer
   - configures dns for the app
 
-This has only been tested on OS X with rbenv / 1.9.3-p429 available, and bundler installed
+creates ec2 xmpp servers
+
+  - installs chef clients on the xmpp servers
+  - installs and configures git, java, tigase
 
 Clone the repo and install gems
 --
@@ -65,9 +69,9 @@ rake dns
 ```
 Care and feeding
 --
-Get an overview of the app's cloud deployment
+Get an overview of the app's cloud deployment (default rake task)
 ```sh
-rake get_info
+rake
 ```
 Update all webservers. This will apply chef configuration changes and update the sinatra app.
 This would not work in a zero downtime deploy strategy without more effort.
