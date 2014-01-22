@@ -59,8 +59,8 @@ task :dns do
 end
 
 desc "Update cookbook and role"
-task :push_cookbook do
-  Chef.push_cookbook
+task :push_chef_updates do
+  Chef.push_updates
 end
 
 desc "Destroy any active Compute instances."
